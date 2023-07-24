@@ -135,6 +135,7 @@ func (s *SubsetFontObj) SetTTFData(data []byte) error {
 // AddChars add char to map CharacterToGlyphIndex
 func (s *SubsetFontObj) AddChars(txt string) (string, error) {
 	var buff []rune
+	var prevGlyphIndex uint = 0
 	for _, runeValue := range txt {
 		if s.CharacterToGlyphIndex.KeyExists(runeValue) {
 			buff = append(buff, runeValue)
@@ -157,8 +158,13 @@ func (s *SubsetFontObj) AddChars(txt string) (string, error) {
 		} else if err != nil {
 			return "", err
 		}
+
+		if s.ttfFontOption.OnGlyphIndexGoingSet != nil {
+			glyphIndex = s.ttfFontOption.OnGlyphIndexGoingSet(runeValue, glyphIndex, prevGlyphIndex)
+		}
 		s.CharacterToGlyphIndex.Set(runeValue, glyphIndex) // [runeValue] = glyphIndex
 		buff = append(buff, runeValue)
+		prevGlyphIndex = glyphIndex
 	}
 	return string(buff), nil
 }

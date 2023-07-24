@@ -3,9 +3,10 @@ package gopdf
 // TtfOption  font option
 type TtfOption struct {
 	UseKerning                bool
-	Style                     int               //Regular|Bold|Italic
-	OnGlyphNotFound           func(r rune)      //Called when a glyph cannot be found, just for debugging
-	OnGlyphNotFoundSubstitute func(r rune) rune //Called when a glyph cannot be found, we can return a new rune to replace it.
+	Style                     int                                                     //Regular|Bold|Italic
+	OnGlyphNotFound           func(r rune)                                            //Called when a glyph cannot be found, just for debugging
+	OnGlyphNotFoundSubstitute func(r rune) rune                                       //Called when a glyph cannot be found, we can return a new rune to replace it.
+	OnGlyphIndexGoingSet      func(r rune, glyphIndex uint, prevGlyphIndex uint) uint //Called when a glyph index going to be set.
 }
 
 func defaultTtfFontOption() TtfOption {

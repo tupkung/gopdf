@@ -778,6 +778,172 @@ func TestAddHeaderFooter(t *testing.T) {
 	}
 }
 
+func TestSubSetFontOptionToSetGlyphIndex(t *testing.T) {
+	err := initTesting()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// created pdf.
+	pdf := GoPdf{}
+	pdf.Start(Config{PageSize: *PageSizeA4})
+	pdf.AddPage()
+	err = pdf.AddTTFFont("IBMPlexSansThaiLooped", "./test/res/IBMPlexSansThaiLooped-Regular.ttf")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = pdf.AddTTFFont("THSarabunNewRegular", "./test/res/TH-Sarabun-New-Regular.ttf")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = pdf.AddTTFFont("AnuphanRegular", "./test/res/Anuphan-Regular.ttf")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = pdf.AddTTFFont("SarabunRegular", "./test/res/Sarabun-Regular.ttf")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = pdf.SetFont("SarabunRegular", "", 24)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	pdf.Cell(nil, "วันที่ดี คือวันที่มี สวัสดิ์ภาพและการลงทุนที่ดี ตั๊บ")
+
+	err = pdf.WritePdf("./test/out/before_subset_font_option_to_set_glyph_index.pdf")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	// reset
+	pdf.Start(Config{PageSize: *PageSizeA4})
+	pdf.AddPage()
+	err = pdf.AddTTFFontWithOption("AnuphanRegular", "./test/res/Anuphan-Regular.ttf", TtfOption{
+		UseKerning: true,
+		OnGlyphIndexGoingSet: func(r rune, glyphIndex uint, prevGlyphIndex uint) uint {
+
+			// NotoSerifThai-Regular.ttf
+			//if glyphIndex == 373 {
+			//	glyphIndex = 375 // maiEk-thai.small
+			//}
+			//
+			//if glyphIndex == 378 {
+			//	glyphIndex = 380 // maiTho-thai.small
+			//}
+			//
+			//if glyphIndex == 381 {
+			//	glyphIndex = 383 // maiTri-thai.small
+			//}
+			//
+			//if glyphIndex == 370 {
+			//	glyphIndex = 372 // maiChattawa-thai.small
+			//}
+			//
+			//if glyphIndex == 443 {
+			//	glyphIndex = 445 // maiThanthakhat-thai.small
+			//}
+
+			// Anuphan-regular.ttf
+			if glyphIndex == 678 {
+				glyphIndex = 679 // maiEk-thai.small
+			}
+
+			if glyphIndex == 681 {
+				glyphIndex = 682 // maiTho-thai.small
+			}
+
+			if glyphIndex == 684 {
+				glyphIndex = 685 // maiTri-thai.small
+			}
+
+			if glyphIndex == 687 {
+				glyphIndex = 688 // maiChattawa-thai.small
+			}
+
+			if glyphIndex == 689 {
+				glyphIndex = 690 // maiThanthakhat-thai.small
+			}
+
+			// Sarabun-Regular.ttf
+			//if glyphIndex == 735 {
+			//	glyphIndex = 736 // maiEk-thai.small
+			//}
+			//
+			//if glyphIndex == 738 {
+			//	glyphIndex = 739 // maiTho-thai.small
+			//}
+			//
+			//if glyphIndex == 741 {
+			//	glyphIndex = 742 // maiTri-thai.small
+			//}
+			//
+			//if glyphIndex == 744 {
+			//	glyphIndex = 745 // maiChattawa-thai.small
+			//}
+			//
+			//if glyphIndex == 746 {
+			//	glyphIndex = 747 // maiThanthakhat-thai.small
+			//}
+
+			// +15 index to map in GitHub IBM Plex Sans Thai
+			//if glyphIndex == 460 {
+			//	glyphIndex = 490 // maiEk-thai.small
+			//}
+			//
+			//if glyphIndex == 464 {
+			//	glyphIndex = 491 // maiChattawa-thai.small
+			//}
+			//
+			//if glyphIndex == 471 {
+			//	glyphIndex = 494 // maiTho-thai.small
+			//}
+			//
+			//if glyphIndex == 472 {
+			//	glyphIndex = 496 // maiTri-thai.small
+			//}
+			//
+			//if glyphIndex == 465 {
+			//	glyphIndex = 492 // nikhahit-thai.small
+			//}
+			//
+			//if glyphIndex == 469 {
+			//	glyphIndex = 493 // thanthakhat-thai.small
+			//}
+
+			return glyphIndex
+		},
+	})
+	err = pdf.SetFont("AnuphanRegular", "", 24)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	pdf.Cell(nil, "วันที่ดี ช้า ช้ำ เร็ว มากๆ สวัสดิ์ภาพและการลงทุนที่ดี ซ้ำ ปุ๊บปั๊บ อย่างช้าเลย")
+
+	pdf.SetY(300)
+	pdf.SetX(20)
+	pdf.Cell(nil, "เลขที่ 123/45 หมู่ที่ 77 หมู่บ้านสุขสวัสด์ิ ซอยวัดอรุณ 4 ถนนเจริญกรุง")
+
+	err = pdf.WritePdf("./test/out/after_subset_font_option_to_set_glyph_index.pdf")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
 func initTesting() error {
 	err := os.MkdirAll("./test/out", 0777)
 	if err != nil {
